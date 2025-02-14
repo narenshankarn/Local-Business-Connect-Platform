@@ -22,7 +22,7 @@ app.use(express.json());
 
 app.get("/", async (req, res) => {
     try{
-        const result = await db.query("SELECT * FROM restaurants");
+        const result = await db.query("SELECT * FROM restaurants ORDER BY id");
         res.send(result.rows);
     }
     catch(error) {
@@ -47,8 +47,32 @@ app.post("/addRestaurant", async (req, res) => {
     const location = req.body.location;
     const price_range = req.body.price_range;
     try{
-        console.log(name, location, price_range);
         const result = await db.query("INSERT INTO restaurants(name, location, price_range) VALUES($1, $2, $3) returning *", [name, location, price_range]);
+        res.send(result.rows);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
+
+app.put("/restaurants/:id", async(req, res) => {
+    const id = req.params.id;
+    const name = req.body.name;
+    const location = req.body.location;
+    const price_range = req.body.price_range;
+    try{
+        const result = await db.query("UPDATE restaurants SET name = $1, location = $2, price_range = $3 WHERE id = $4 returning *", [name, location, price_range, id]);
+        res.send(result.rows);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
+
+app.delete("/restaurants/:id", async(req, res) => {
+    const id = req.params.id;
+    try{
+        const result = await db.query("DELETE FROM restaurants WHERE id = $1 returning *", [id]);
         res.send(result.rows);
     }
     catch (error) {
